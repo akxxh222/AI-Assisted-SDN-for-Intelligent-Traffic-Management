@@ -80,15 +80,69 @@ int main()
     std::map<FlowId, FlowMonitor::FlowStats> stats =
     	flowMonitor->GetFlowStats();
 
+    
     for (auto const& flow : stats)
 {
-    	std::cout << "Flow ID: " << flow.first << std::endl;
-    	std::cout << "Packets Sent: " << flow.second.txPackets << std::endl;
-    	std::cout << "Packets Received: " << flow.second.rxPackets << std::endl;
-    	std::cout << "Packets Lost: "
-              << flow.second.txPackets - flow.second.rxPackets
-              << std::endl;
+    const auto& s = flow.second;
+
+    // 1. Calculate packet loss
+    uint64_t lostPackets = s.txPackets - s.rxPackets;
+    double packetLossPercent = 0.0;
+
+    if (s.txPackets > 0)
+    {
+        packetLossPercent =
+            (static_cast<double>(lostPackets) / s.txPackets) * 100.0;
+    }
+
+    // 2. Calculate average end-to-end delay
+    double averageDelayMs = 0.0;
+
+    if (s.rxPackets > 0)
+    {
+        averageDelayMs =
+            (s.delaySum.GetSeconds() / s.rxPackets) * 1000.0;
+    }
+
+    // 3. Calculate received throughput
+    double throughputMbps = 0.0;
+
+    if (s.rxPackets > 0)
+    {
+        double duration =
+            (s.timeLastRxPacket - s.timeFirstTxPacket).GetSeconds();
+
+        if (duration > 0.0)
+        {
+            throughputMbps =
+                (static_cast<double>(s.rxBytes) * 8.0)
+                / duration / 1e6;
+        }
+    }
+
+    // 4. Print results
+    std::cout << "\n========== Flow " << flow.first
+              << " ==========\n";
+
+    std::cout << "Packets Sent: "
+              << s.txPackets << '\n';
+
+    std::cout << "Packets Received: "
+              << s.rxPackets << '\n';
+
+    std::cout << "Packets Lost: "
+              << lostPackets << '\n';
+
+    std::cout << "Packet Loss: "
+              << packetLossPercent << "%\n";
+
+    std::cout << "Average Delay: "
+              << averageDelayMs << " ms\n";
+
+    std::cout << "Throughput: "
+              << throughputMbps << " Mbps\n";
 }
+
 
     Simulator::Destroy();
 
