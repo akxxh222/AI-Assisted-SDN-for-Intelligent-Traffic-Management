@@ -1,0 +1,34 @@
+# NS-3 build files
+build/
+cmake-cache/
+.cache/
+
+# Compiled files
+*.o
+*.so
+*.a
+*.dylib
+*.dll
+*.exe
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Generated datasets
+data/*.csv
+data/*.json
+
+# Generated results
+results/*.csv
+results/*.png
+results/*.pdf
+
+# OS/editor files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
